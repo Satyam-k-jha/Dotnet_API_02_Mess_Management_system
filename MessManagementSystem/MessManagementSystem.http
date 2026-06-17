@@ -1,0 +1,6 @@
+@MessManagementSystem_HostAddress = http://localhost:5017
+
+GET {{MessManagementSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
