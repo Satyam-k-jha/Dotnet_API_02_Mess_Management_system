@@ -2,6 +2,7 @@
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,28 +15,30 @@ namespace MessManagementSystem.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IAttendanceRepository _attendanceRepository;
 
-        public AttendanceController(AppDbContext context, IMapper mapper)
+        public AttendanceController(AppDbContext context, IMapper mapper,IAttendanceRepository attendanceRepository)
         {
             _context = context;
             this._mapper = mapper;
+            this._attendanceRepository = attendanceRepository;
         }
 
         //GET: api/attendance
 
         [HttpGet]
-        public IActionResult GetAllAttendances()
+        public async Task<IActionResult> GetAllAttendances()
         {
-            var attendances = _context.Attendances.ToList();
+            var attendances = await _attendanceRepository.GetAllAsync();
             return Ok(_mapper.Map<IEnumerable<AttendanceDto>>(attendances));
         }
 
         //GET: api/attendance/{id}
         [HttpGet]
         [Route("{id:guid}")]
-        public IActionResult GetAttendanceById([FromRoute] Guid id)
+        public async Task<IActionResult> GetAttendanceById([FromRoute] Guid id)
         {
-            var attendance = _context.Attendances.Include(s=>s.Student).FirstOrDefault(s => s.Id == id);
+            var attendance = await _attendanceRepository.GetByIdAsync(id);
             if (attendance == null)
             {
                 return NotFound();
@@ -47,12 +50,11 @@ namespace MessManagementSystem.Controllers
 
         //POST: api/attendance
         [HttpPost]
-        public IActionResult AddAttendance([FromBody] AddAttendanceDto addAttendanceDto)
+        public async Task<IActionResult> AddAttendance([FromBody] AddAttendanceDto addAttendanceDto)
         {
             //Dto -> Model
             var attendance = _mapper.Map<Attendance>(addAttendanceDto);
-            _context.Attendances.Add(attendance);
-            _context.SaveChanges();
+            attendance = await _attendanceRepository.CreateAsync(attendance);
             //Model to Dto
             return Ok(_mapper.Map<AttendanceDto>(attendance));
         }
@@ -60,15 +62,15 @@ namespace MessManagementSystem.Controllers
         //PUT: api/attendance/{id}
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdateAttendance([FromRoute] Guid id, [FromBody] UpdateAttendanceDto updateAttendanceDto)
+        public async Task<IActionResult> UpdateAttendance([FromRoute] Guid id, [FromBody] UpdateAttendanceDto updateAttendanceDto)
         {
-            var attendance = _context.Attendances.FirstOrDefault(s => s.Id == id);
+
+            var attendance = _mapper.Map<Attendance>(updateAttendanceDto);
+            attendance = await _attendanceRepository.UpdateAsync(id, attendance);
             if(attendance == null)
             {
                 return NotFound();
             }
-            _mapper.Map(updateAttendanceDto, attendance);
-            _context.SaveChanges();
             //Model to Dto
             return Ok(_mapper.Map<AttendanceDto>(attendance));
         }
@@ -76,15 +78,13 @@ namespace MessManagementSystem.Controllers
         //DELETE: api/attendance/{id}
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult DeleteAttendance([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteAttendance([FromRoute] Guid id)
         {
-            var attendance = _context.Attendances.FirstOrDefault(s => s.Id == id);
+            var attendance = await _attendanceRepository.DeleteAsync(id);
             if (attendance == null)
             {
                 return NotFound();
             }
-            _context.Attendances.Remove(attendance);
-            _context.SaveChanges();
             //Model to Dto
             return Ok(_mapper.Map<AttendanceDto>(attendance));
         }

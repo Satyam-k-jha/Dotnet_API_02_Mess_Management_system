@@ -2,8 +2,10 @@
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MessManagementSystem.Controllers
 {
@@ -13,69 +15,67 @@ namespace MessManagementSystem.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
-        public FoodController(AppDbContext context, IMapper mapper)
+        private readonly IFoodRepository _foodRepostiory;
+
+        public FoodController(AppDbContext context, IMapper mapper,IFoodRepository foodRepostiory)
         {
             _context = context;
             _mapper = mapper;
+            _foodRepostiory = foodRepostiory;
         }
         //GET: api/Food
         [HttpGet]
-        public IActionResult GefAllFoods()
+        public async Task<IActionResult> GefAllFoods()
         {
-                var foods = _context.Foods.ToList();
-                return Ok(_mapper.Map<IEnumerable<FoodDto>>(foods));
+            var foods = await _foodRepostiory.GetAllAsync();
+            return Ok(_mapper.Map<IEnumerable<FoodDto>>(foods));
         }
         //GET: api/food/{id}
         [HttpGet]
         [Route("{id:guid}")]
-        public IActionResult GetFoodById([FromRoute] Guid id)
+        public async Task<IActionResult> GetFoodById([FromRoute] Guid id)
         {
-            var food = _context.Foods.FirstOrDefault(s => s.Id == id);
+            var food = await _foodRepostiory.GetByIdAsync(id);
             if (food == null)
             {
-                return NotFound();
+                return null;
             }
-            return Ok(_mapper.Map<FoodDto>(food));
+            return Ok(_mapper.Map<FoodWithMenuDto>(food));
         }
 
         //POST: api/food
         [HttpPost]
-        public IActionResult AddFood([FromBody] AddFoodDto addFoodDto)
+        public async Task<IActionResult> AddFood([FromBody] AddFoodDto addFoodDto)
         {
             var food = _mapper.Map<Food>(addFoodDto);
-            _context.Foods.Add(food);
-            _context.SaveChanges();
+            food = await _foodRepostiory.CreateAsync(food);
             return CreatedAtAction(nameof(GetFoodById), new { id = food.Id }, food);
         }
 
         //PUT: api/food/{id}
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdateFood([FromRoute] Guid id, [FromBody] UpdateFoodDto updateFoodDto)
+        public async Task<IActionResult> UpdateFood([FromRoute] Guid id, [FromBody] UpdateFoodDto updateFoodDto)
         {
-            var food = _context.Foods.FirstOrDefault(s => s.Id == id);
+            var food = _mapper.Map<Food>(updateFoodDto);
+            food = await _foodRepostiory.UpdateAsync(id, food);
             if (food == null)
             {
                 return NotFound();
             }
-            _mapper.Map(updateFoodDto, food);
-            _context.SaveChanges();
             return Ok(_mapper.Map<FoodDto>(food));
         }
 
         //Delete: api/food/{id}
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult DeleteFood([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteFood([FromRoute] Guid id)
         {
-            var food = _context.Foods.FirstOrDefault(s => s.Id == id);
+            var food = await _foodRepostiory.DeleteAsync(id);
             if (food == null)
             {
                 return NotFound();
-
             }
-            _context.Foods.Remove(food);
-            _context.SaveChanges();
             return Ok(_mapper.Map<FoodDto>(food));
         }
     }

@@ -2,6 +2,7 @@
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,34 +14,30 @@ namespace MessManagementSystem.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentController(AppDbContext context, IMapper mapper)
+        public StudentController(AppDbContext context, IMapper mapper, IStudentRepository studentRepository)
         {
             _context = context;
             _mapper = mapper;
+            _studentRepository = studentRepository;
         }
 
         // GET: api/Student
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var students = _context.Students
-            .Select(s => new StudentDto
-                {
-            Id = s.Id,
-            Name = s.Name
-                    })
-                .ToList();
+            var students = await _studentRepository.GetAllAsync();
 
             return Ok(_mapper.Map<IEnumerable<StudentDto>>(students));
         }
 
         [HttpGet]
         [Route("{id:guid}")]
-        public IActionResult GetById([FromRoute] Guid id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            var student = _context.Students.Include(s=>s.Attendances).FirstOrDefault(s => s.Id == id);
-            if (student == null)
+            var student = await _studentRepository.GetByIdAsync(id);
+            if(student == null)
             {
                 return NotFound();
             }
@@ -49,12 +46,12 @@ namespace MessManagementSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddStudent([FromBody] AddStudentDto addStudentDto)
+        public async Task<IActionResult> AddStudent([FromBody] AddStudentDto addStudentDto)
         {
             //Dto -> Model
             var student = _mapper.Map<Student>(addStudentDto);
-            _context.Students.Add(student);
-            _context.SaveChanges();
+            student = await _studentRepository.CreateAsync(student);
+            
             //Model -> Dto
             var dto = _mapper.Map<StudentDto>(student);
             return CreatedAtAction(nameof(GetById), new { id = student.Id }, dto);
@@ -62,36 +59,27 @@ namespace MessManagementSystem.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdateStudent([FromRoute] Guid id, [FromBody] UpdateStudentDto updateStudentDto)
+        public async Task<IActionResult> UpdateStudent([FromRoute] Guid id, [FromBody] UpdateStudentDto updateStudentDto)
         {
-            var student = _context.Students.FirstOrDefault(s => s.Id == id);
+            var student = _mapper.Map<Student>(updateStudentDto);
+            student = await _studentRepository.UpdateAsync(id, student);
             if (student == null)
             {
                 return NotFound();
             }
-            _mapper.Map(updateStudentDto, student);
-            _context.SaveChanges();
-            //var dto = new StudentDto
-            //{
-            //    Id = student.Id,
-            //    Name = updateStudentDto.Name
-            //};
-
             //Model to Dto
             return Ok(_mapper.Map<StudentDto>(student));
         }
 
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            var student = _context.Students.FirstOrDefault(s => s.Id == id);
+            var student = _studentRepository.DeleteAsync(id);
             if (student == null)
             {
                 return NotFound();
             }
-            _context.Students.Remove(student);
-            _context.SaveChanges();
             //Model to Dto
             return Ok(_mapper.Map<StudentDto>(student));
         }

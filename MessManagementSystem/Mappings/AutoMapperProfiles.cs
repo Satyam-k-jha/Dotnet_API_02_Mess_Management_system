@@ -19,6 +19,14 @@ namespace MessManagementSystem.Mappings
             CreateMap<Food, FoodDto>().ReverseMap();
             CreateMap<Food, AddFoodDto>().ReverseMap();
             CreateMap<Food, UpdateFoodDto>().ReverseMap();
+            CreateMap<Food, FoodWithMenuDto>().ReverseMap();
+            CreateMap<Food, FoodSummaryDto>().ReverseMap();
+            CreateMap<Menu, MenuDto>().ReverseMap();
+            CreateMap<Menu, AddMenuDto>().ReverseMap();
+            CreateMap<Menu, UpdateMenuDto>().ReverseMap();
+            CreateMap<Menu, MenuWithFoodDto>().ReverseMap();
+            CreateMap<Menu, MenuSummaryDto>().ReverseMap();
+
 
         }
     }
