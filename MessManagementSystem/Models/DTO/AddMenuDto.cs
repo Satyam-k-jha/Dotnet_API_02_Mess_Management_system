@@ -2,6 +2,7 @@
 {
     public class AddMenuDto
     {
+        [Required]
         public DateOnly Date { get; set; }
     }
 }
