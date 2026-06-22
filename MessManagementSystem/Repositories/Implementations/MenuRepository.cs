@@ -1,8 +1,9 @@
 ﻿using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
+using MessManagementSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MessManagementSystem.Repositories
+namespace MessManagementSystem.Repositories.Implementations
 {
     public class MenuRepository : IMenuRepository
     {

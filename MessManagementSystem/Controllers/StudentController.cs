@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using MessManagementSystem.CustomActionFilters;
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
-using MessManagementSystem.Repositories;
+using MessManagementSystem.Repositories.Interfaces;
+using MessManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +16,14 @@ namespace MessManagementSystem.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IStudentService _studentService;
         private readonly IStudentRepository _studentRepository;
 
-        public StudentController(AppDbContext context, IMapper mapper, IStudentRepository studentRepository)
+        public StudentController(AppDbContext context, IMapper mapper, IStudentService studentService, IStudentRepository studentRepository)
         {
             _context = context;
             _mapper = mapper;
+            this._studentService = studentService;
             _studentRepository = studentRepository;
         }
 
@@ -27,9 +31,9 @@ namespace MessManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var students = await _studentRepository.GetAllAsync();
+            var students = await _studentService.GetAllStudentsAsync();
 
-            return Ok(_mapper.Map<IEnumerable<StudentDto>>(students));
+            return Ok(students);
         }
 
         [HttpGet]
@@ -46,6 +50,7 @@ namespace MessManagementSystem.Controllers
         }
 
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto addStudentDto)
         {
             //Dto -> Model
@@ -59,6 +64,7 @@ namespace MessManagementSystem.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [ValidateModel]
         public async Task<IActionResult> UpdateStudent([FromRoute] Guid id, [FromBody] UpdateStudentDto updateStudentDto)
         {
             var student = _mapper.Map<Student>(updateStudentDto);

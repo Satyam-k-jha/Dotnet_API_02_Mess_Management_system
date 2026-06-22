@@ -1,6 +1,6 @@
 ﻿using MessManagementSystem.Models.Domain;
 
-namespace MessManagementSystem.Repositories
+namespace MessManagementSystem.Repositories.Interfaces
 {
     public interface IAttendanceRepository
     {

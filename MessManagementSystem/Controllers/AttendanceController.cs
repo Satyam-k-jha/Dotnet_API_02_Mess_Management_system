@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using MessManagementSystem.CustomActionFilters;
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
-using MessManagementSystem.Repositories;
+using MessManagementSystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ namespace MessManagementSystem.Controllers
         //GET: api/attendance/{id}
         [HttpGet]
         [Route("{id:guid}")]
+
         public async Task<IActionResult> GetAttendanceById([FromRoute] Guid id)
         {
             var attendance = await _attendanceRepository.GetByIdAsync(id);
@@ -50,6 +52,7 @@ namespace MessManagementSystem.Controllers
 
         //POST: api/attendance
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> AddAttendance([FromBody] AddAttendanceDto addAttendanceDto)
         {
             //Dto -> Model
@@ -62,6 +65,7 @@ namespace MessManagementSystem.Controllers
         //PUT: api/attendance/{id}
         [HttpPut]
         [Route("{id:guid}")]
+        [ValidateModel]
         public async Task<IActionResult> UpdateAttendance([FromRoute] Guid id, [FromBody] UpdateAttendanceDto updateAttendanceDto)
         {
 

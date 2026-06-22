@@ -1,9 +1,10 @@
 ﻿using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MessManagementSystem.Repositories
+namespace MessManagementSystem.Repositories.Implementations
 {
 
     public class FoodRepository : IFoodRepository

@@ -1,6 +1,7 @@
 using MessManagementSystem.Data;
 using MessManagementSystem.Mappings;
-using MessManagementSystem.Repositories;
+using MessManagementSystem.Repositories.Implementations;
+using MessManagementSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

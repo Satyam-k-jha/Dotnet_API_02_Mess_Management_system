@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using MessManagementSystem.CustomActionFilters;
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
-using MessManagementSystem.Repositories;
+using MessManagementSystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,7 @@ namespace MessManagementSystem.Controllers
 
         //POST: api/menu
         [HttpPost]
+        [ValidateModel]
         public async Task<IActionResult> CreateMenu([FromBody] AddMenuDto addMenuDto)
         {
             var menu = _mapper.Map<Menu>(addMenuDto);
@@ -58,6 +60,7 @@ namespace MessManagementSystem.Controllers
         //PUT: api/menu/{id}
         [HttpPut]
         [Route("{id:guid}")]
+        [ValidateModel]
         public async Task<IActionResult> UpdateMenu([FromRoute] Guid id, [FromBody] UpdateMenuDto updateMenuDto)
         {
             var menu = _mapper.Map<Menu>(updateMenuDto);
