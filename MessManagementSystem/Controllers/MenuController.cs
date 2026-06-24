@@ -4,6 +4,7 @@ using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
 using MessManagementSystem.Repositories.Interfaces;
+using MessManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,23 +15,19 @@ namespace MessManagementSystem.Controllers
     [ApiController]
     public class MenuController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-        private readonly IMenuRepository _menuRepository;
+        private readonly IMenuService _menuService;
 
-        public MenuController(AppDbContext context, IMapper mapper, IMenuRepository menuRepository)
+        public MenuController(IMenuService menuService)
         {
-            _context = context;
-            this._mapper = mapper;
-            this._menuRepository = menuRepository;
+            _menuService = menuService;
         }
 
         //GET: api/menu
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var menus = await _menuRepository.GetAllAsync();
-            return Ok(_mapper.Map<IEnumerable<MenuDto>>(menus));
+            var menus = await _menuService.GetAllMenusAsync();
+            return Ok(menus);
         }
 
         //GET: api/menu/{id}
@@ -38,12 +35,12 @@ namespace MessManagementSystem.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> GetMenuById([FromRoute] Guid id)
         {
-            var menu = await _menuRepository.GetByIdAsync(id);
+            var menu = await _menuService.GetMenuByIdAsync(id);
             if (menu == null)
             {
                 return NotFound();
             }
-            return Ok(_mapper.Map<MenuDto>(menu));
+            return Ok(menu);
         }
 
         //POST: api/menu
@@ -51,10 +48,8 @@ namespace MessManagementSystem.Controllers
         [ValidateModel]
         public async Task<IActionResult> CreateMenu([FromBody] AddMenuDto addMenuDto)
         {
-            var menu = _mapper.Map<Menu>(addMenuDto);
-            menu = await _menuRepository.CreateAsync(menu);
-            
-            return CreatedAtAction(nameof(GetMenuById), new { id = menu.MenuId }, _mapper.Map<MenuDto>(menu));
+            var menu = await _menuService.AddMenuAsync(addMenuDto);
+            return CreatedAtAction(nameof(GetMenuById), new { id = menu.MenuId }, menu);
         }
 
         //PUT: api/menu/{id}
@@ -63,14 +58,12 @@ namespace MessManagementSystem.Controllers
         [ValidateModel]
         public async Task<IActionResult> UpdateMenu([FromRoute] Guid id, [FromBody] UpdateMenuDto updateMenuDto)
         {
-            var menu = _mapper.Map<Menu>(updateMenuDto);
-            menu = await _menuRepository.UpdateAsync(id,menu);
-            if (menu == null)
+            var menu = await _menuService.UpdateMenuAsync(id, updateMenuDto);
+            if(menu == null)
             {
                 return NotFound();
             }
-            return Ok(_mapper.Map<MenuDto>(menu));
-
+            return Ok(menu);
         }
 
         //DELETE: api/menu/{id}
@@ -78,12 +71,12 @@ namespace MessManagementSystem.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            var menu = await _menuRepository.DeleteAsync(id);
+            var menu = await _menuService.DeleteMenuAsync(id);
             if (menu == null)
             {
                 return NotFound();
             }
-            return Ok(_mapper.Map<MenuDto>(menu));
+            return Ok(menu);
         }
     }
 }

@@ -2,6 +2,8 @@ using MessManagementSystem.Data;
 using MessManagementSystem.Mappings;
 using MessManagementSystem.Repositories.Implementations;
 using MessManagementSystem.Repositories.Interfaces;
+using MessManagementSystem.Services.Implementations;
+using MessManagementSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,8 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(AutoMapperProfiles));
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IFoodRepository, FoodRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 var app = builder.Build();
 

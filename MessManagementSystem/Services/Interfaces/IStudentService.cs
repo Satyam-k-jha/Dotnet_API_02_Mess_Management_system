@@ -6,5 +6,8 @@ namespace MessManagementSystem.Services.Interfaces
     {
         Task<List<StudentDto>> GetAllStudentsAsync();
         Task<StudentDto> DeleteStudentsSafely(Guid id);
+        Task<StudentWithAttendanceDto> GetStudentByIdAsync(Guid id);
+        Task<StudentDto>UpdateStudentAsync(Guid id, UpdateStudentDto updateStudentDto);
+        Task<StudentDto> AddStudentAsync(AddStudentDto addStudentDto);
     }
 }

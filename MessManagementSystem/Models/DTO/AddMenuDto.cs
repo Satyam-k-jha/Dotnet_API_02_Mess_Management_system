@@ -1,4 +1,6 @@
-﻿namespace MessManagementSystem.Models.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MessManagementSystem.Models.DTO
 {
     public class AddMenuDto
     {

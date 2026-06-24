@@ -4,6 +4,7 @@ using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
 using MessManagementSystem.Repositories.Interfaces;
+using MessManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,34 +15,31 @@ namespace MessManagementSystem.Controllers
     [ApiController]
     public class FoodController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-        private readonly IFoodRepository _foodRepostiory;
+        private readonly IFoodService _foodService;
 
-        public FoodController(AppDbContext context, IMapper mapper,IFoodRepository foodRepostiory)
+        public FoodController(IFoodService foodService)
         {
-            _context = context;
-            _mapper = mapper;
-            _foodRepostiory = foodRepostiory;
+            this._foodService = foodService;
         }
         //GET: api/Food
         [HttpGet]
-        public async Task<IActionResult> GefAllFoods()
+        public async Task<IActionResult> GetAllFoods()
         {
-            var foods = await _foodRepostiory.GetAllAsync();
-            return Ok(_mapper.Map<IEnumerable<FoodDto>>(foods));
+            var foods = await _foodService.GetAllFoodsAsync();
+            return Ok(foods);
+           
         }
         //GET: api/food/{id}
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<IActionResult> GetFoodById([FromRoute] Guid id)
         {
-            var food = await _foodRepostiory.GetByIdAsync(id);
-            if (food == null)
+            var food = _foodService.GetFoodByIdAsync(id);
+            if(food == null)
             {
-                return null;
+                return NotFound("Food Not Found");
             }
-            return Ok(_mapper.Map<FoodWithMenuDto>(food));
+            return Ok(food);
         }
 
         //POST: api/food
@@ -49,8 +47,7 @@ namespace MessManagementSystem.Controllers
         [ValidateModel]
         public async Task<IActionResult> AddFood([FromBody] AddFoodDto addFoodDto)
         {
-            var food = _mapper.Map<Food>(addFoodDto);
-            food = await _foodRepostiory.CreateAsync(food);
+            var food = await _foodService.AddFoodAsync(addFoodDto);
             return CreatedAtAction(nameof(GetFoodById), new { id = food.Id }, food);
         }
 
@@ -60,13 +57,12 @@ namespace MessManagementSystem.Controllers
         [ValidateModel]
         public async Task<IActionResult> UpdateFood([FromRoute] Guid id, [FromBody] UpdateFoodDto updateFoodDto)
         {
-            var food = _mapper.Map<Food>(updateFoodDto);
-            food = await _foodRepostiory.UpdateAsync(id, food);
-            if (food == null)
+            var food = await _foodService.UpdateFoodAsync(id, updateFoodDto);
+            if(food == null)
             {
                 return NotFound();
             }
-            return Ok(_mapper.Map<FoodDto>(food));
+            return Ok(food);
         }
 
         //Delete: api/food/{id}
@@ -74,12 +70,12 @@ namespace MessManagementSystem.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteFood([FromRoute] Guid id)
         {
-            var food = await _foodRepostiory.DeleteAsync(id);
-            if (food == null)
+            var food = _foodService.DeleteFoodAsync(id);
+            if(food == null)
             {
                 return NotFound();
             }
-            return Ok(_mapper.Map<FoodDto>(food));
+            return Ok(food);
         }
     }
 }
