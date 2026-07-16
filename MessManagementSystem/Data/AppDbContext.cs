@@ -14,5 +14,6 @@ namespace MessManagementSystem.Data
         public DbSet<Food> Foods { get; set; }
         public DbSet<Menu> Menus { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

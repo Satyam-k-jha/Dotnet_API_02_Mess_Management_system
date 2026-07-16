@@ -45,19 +45,15 @@ namespace MessManagementSystem.Services.Implementations
             var deletedStudent = await studentRepository.DeleteAsync(id);
 
             // 4. Map back to DTO
-            return new StudentDto { Id = deletedStudent.Id, Name = deletedStudent.Name };
+            return mapper.Map<StudentDto>(student);
         }
 
         public async Task<List<StudentDto>> GetAllStudentsAsync()
         {
             var students = await studentRepository.GetAllAsync();
-            var studentDTOs = students.Select(s => new StudentDto
-            {
-                Id = s.Id,
-                Name = s.Name
-            }).ToList();
+            
 
-            return studentDTOs;
+            return mapper.Map<List<StudentDto>>(students);
         }
 
         public async Task<StudentWithAttendanceDto> GetStudentByIdAsync(Guid id)

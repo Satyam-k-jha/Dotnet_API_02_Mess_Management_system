@@ -1,0 +1,116 @@
+﻿using AutoMapper;
+using MessManagementSystem.Data;
+using MessManagementSystem.Models.Domain;
+using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace MessManagementSystem.Services.Implementations
+{
+    public class AuthService : IAuthService
+    {
+        private readonly AppDbContext context;
+        private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
+
+        public AuthService(AppDbContext context, IMapper mapper, IConfiguration configuration)
+        {
+            this.context = context;
+            this.mapper = mapper;
+            this.configuration = configuration;
+        }
+        public async Task<TokenResponseDto?> LoginUserAsync(LoginUserDto request)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+            if (user == null)
+            {
+                return null;
+            }
+            else if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+            {
+                return null;
+            }
+            var response = new TokenResponseDto {
+                AccessToken = CreateToken(user),
+                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+            };
+            return response;
+
+        }
+
+        public async Task<ResponseUserDto?> RegisterUserAsync(RegisterUserDto request)
+        {
+            User user = new();
+            string hashedPassword = new PasswordHasher<User>()
+                .HashPassword(user, request.Password);
+            user.UserName = request.UserName;
+            user.PasswordHash = hashedPassword;
+            await context.AddAsync(user);
+            await context.SaveChangesAsync();
+            return mapper.Map<ResponseUserDto>(user);
+        }
+
+        private async Task<User?> ValidateRefreshTokenAsync(Guid userId, String refreshToken)
+        {
+            var user = await context.Users.FindAsync(userId);
+            if(user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return null;
+            }
+            return user;
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        private async Task<String> GenerateAndSaveRefreshTokenAsync(User user)
+        {
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await context.SaveChangesAsync();
+            return refreshToken;
+        }
+
+
+        private string CreateToken(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new JwtSecurityToken(
+                issuer: configuration["Jwt:Issuer"],
+                audience: configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(1),
+                signingCredentials: creds
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+
+        }
+
+        public Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

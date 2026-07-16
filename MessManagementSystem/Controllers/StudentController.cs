@@ -6,6 +6,7 @@ using MessManagementSystem.Models.DTO;
 using MessManagementSystem.Repositories.Interfaces;
 using MessManagementSystem.Services.Implementations;
 using MessManagementSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace MessManagementSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles =("Admin"))]
     public class StudentController : ControllerBase
     {
        
@@ -27,6 +29,7 @@ namespace MessManagementSystem.Controllers
 
         // GET: api/Student
         [HttpGet]
+        
         public async Task<IActionResult> GetAll()
         {
             var students = await _studentService.GetAllStudentsAsync();

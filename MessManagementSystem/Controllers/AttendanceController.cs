@@ -5,6 +5,7 @@ using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
 using MessManagementSystem.Repositories.Interfaces;
 using MessManagementSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +20,13 @@ namespace MessManagementSystem.Controllers
 
         public AttendanceController(IAttendanceService attendanceService)
         {
-            attendanceService = attendanceService;
+            this.attendanceService = attendanceService;
         }
 
         //GET: api/attendance
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAttendances()
         {
             var attendances = await attendanceService.GetAllAttendancesAsync();

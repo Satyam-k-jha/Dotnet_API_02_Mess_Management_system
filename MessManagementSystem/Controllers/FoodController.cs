@@ -34,7 +34,7 @@ namespace MessManagementSystem.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> GetFoodById([FromRoute] Guid id)
         {
-            var food = _foodService.GetFoodByIdAsync(id);
+            var food = await _foodService.GetFoodByIdAsync(id);
             if(food == null)
             {
                 return NotFound("Food Not Found");
@@ -70,7 +70,7 @@ namespace MessManagementSystem.Controllers
         [Route("{id:guid}")]
         public async Task<IActionResult> DeleteFood([FromRoute] Guid id)
         {
-            var food = _foodService.DeleteFoodAsync(id);
+            var food = await _foodService.DeleteFoodAsync(id);
             if(food == null)
             {
                 return NotFound();
