@@ -36,17 +36,29 @@ namespace MessManagementSystem.Services.Implementations
             {
                 return null;
             }
-            var response = new TokenResponseDto {
-                AccessToken = CreateToken(user),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
-            };
+            TokenResponseDto response = await CreateTokenResponse(user);
             return response;
 
         }
 
+        private async Task<TokenResponseDto> CreateTokenResponse(User user)
+        {
+            return new TokenResponseDto
+            {
+                AccessToken = CreateToken(user),
+                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+            };
+        }
+
         public async Task<ResponseUserDto?> RegisterUserAsync(RegisterUserDto request)
         {
-            User user = new();
+
+            User user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+            if (user != null)
+            {
+                return null;
+            }
+            user = new();
             string hashedPassword = new PasswordHasher<User>()
                 .HashPassword(user, request.Password);
             user.UserName = request.UserName;
@@ -54,6 +66,15 @@ namespace MessManagementSystem.Services.Implementations
             await context.AddAsync(user);
             await context.SaveChangesAsync();
             return mapper.Map<ResponseUserDto>(user);
+        }
+        public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var user = await ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+            if(user == null)
+            {
+                return null;
+            }
+            return await CreateTokenResponse(user);
         }
 
         private async Task<User?> ValidateRefreshTokenAsync(Guid userId, String refreshToken)
@@ -108,9 +129,5 @@ namespace MessManagementSystem.Services.Implementations
 
         }
 
-        public Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

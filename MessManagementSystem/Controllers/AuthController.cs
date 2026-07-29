@@ -50,6 +50,19 @@ namespace MessManagementSystem.Controllers
 
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        {
+            var result = await authService.RefreshTokenAsync(request);
+            if(result == null || result.RefreshToken == null || result.AccessToken == null)
+            {
+                return Unauthorized("Invalid Refresh token");
+            }
+            return Ok(result);
+        }
+
+
+
  
 
     }
