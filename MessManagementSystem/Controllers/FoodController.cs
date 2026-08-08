@@ -5,6 +5,7 @@ using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
 using MessManagementSystem.Repositories.Interfaces;
 using MessManagementSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace MessManagementSystem.Controllers
         }
         //GET: api/Food
         [HttpGet]
+        [Authorize(Roles ="Admin,Student")]
         public async Task<IActionResult> GetAllFoods()
         {
             var foods = await _foodService.GetAllFoodsAsync();

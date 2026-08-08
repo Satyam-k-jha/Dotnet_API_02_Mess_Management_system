@@ -49,6 +49,28 @@ namespace MessManagementSystem.Repositories.Implementations
             return attendance;
         }
 
+        public async Task<List<Attendance>> GetByStudentIdAsync(Guid studentId)
+        {
+            var attendance = await _context.Attendances.
+                Where(a => a.StudentId== studentId).
+                ToListAsync();
+            return attendance;
+        }
+
+        public async Task<List<Attendance>> GetByUserIdAsync(Guid userId)
+        {
+            var student = await _context.Students.FirstOrDefaultAsync(o=>o.UserId==userId);
+            if (student == null)
+            {
+                return null;
+            }
+
+            var attendance = await _context.Attendances.
+                Where(a => a.StudentId == student.Id).
+                ToListAsync();
+            return attendance;
+        }
+
         public async Task<Attendance?> UpdateAsync(Guid id, Attendance attendance)
         {
             var existingAttendance = await _context.Attendances.FirstOrDefaultAsync(s => s.Id == id);

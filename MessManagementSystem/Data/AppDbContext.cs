@@ -15,5 +15,15 @@ namespace MessManagementSystem.Data
         public DbSet<Menu> Menus { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Student>()
+                .HasOne(s => s.User)
+                .WithOne(u => u.Student)
+                .HasForeignKey<Student>(s => s.UserId);
+        }
     }
 }

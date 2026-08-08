@@ -4,6 +4,7 @@ using MessManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MessManagementSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806223755_AddUserIdToStudent")]
+    partial class AddUserIdToStudent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace MessManagementSystem.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FoodMenu", b =>
+                {
+                    b.Property<Guid>("FoodsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MenusMenuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("FoodsId", "MenusMenuId");
+
+                    b.HasIndex("MenusMenuId");
+
+                    b.ToTable("FoodMenu");
+                });
 
             modelBuilder.Entity("MessManagementSystem.Models.Domain.Attendance", b =>
                 {
@@ -68,10 +86,6 @@ namespace MessManagementSystem.Migrations
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MenuId");
 
@@ -133,6 +147,21 @@ namespace MessManagementSystem.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("FoodMenu", b =>
+                {
+                    b.HasOne("MessManagementSystem.Models.Domain.Food", null)
+                        .WithMany()
+                        .HasForeignKey("FoodsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MessManagementSystem.Models.Domain.Menu", null)
+                        .WithMany()
+                        .HasForeignKey("MenusMenuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MessManagementSystem.Models.Domain.Attendance", b =>

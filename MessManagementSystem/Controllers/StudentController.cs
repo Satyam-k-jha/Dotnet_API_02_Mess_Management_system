@@ -29,7 +29,7 @@ namespace MessManagementSystem.Controllers
 
         // GET: api/Student
         [HttpGet]
-        
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> GetAll()
         {
             var students = await _studentService.GetAllStudentsAsync();
@@ -39,6 +39,7 @@ namespace MessManagementSystem.Controllers
 
         [HttpGet]
         [Route("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var student = await _studentService.GetStudentByIdAsync(id);
@@ -49,8 +50,29 @@ namespace MessManagementSystem.Controllers
             return Ok(student);
         }
 
+
+        //Logged in user data
+
+        [HttpGet("me")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var studentId = User.FindFirst("StudentId")?.Value;
+
+            if (studentId == null)
+                return Unauthorized();
+
+            var student = await _studentService.GetStudentByIdAsync(Guid.Parse(studentId));
+
+            if (student == null)
+                return NotFound();
+
+            return Ok(student);
+        }
+
         [HttpPost]
         [ValidateModel]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddStudent([FromBody] AddStudentDto addStudentDto)
         {
             var student = await _studentService.AddStudentAsync(addStudentDto);
@@ -61,6 +83,7 @@ namespace MessManagementSystem.Controllers
         [HttpPut]
         [Route("{id:guid}")]
         [ValidateModel]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStudent([FromRoute] Guid id, [FromBody] UpdateStudentDto updateStudentDto)
         {
             var student = await _studentService.UpdateStudentAsync(id, updateStudentDto);
@@ -73,6 +96,7 @@ namespace MessManagementSystem.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var student = await _studentService.DeleteStudentsSafely(id);

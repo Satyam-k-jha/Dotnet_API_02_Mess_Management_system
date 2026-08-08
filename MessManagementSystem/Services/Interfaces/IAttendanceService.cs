@@ -9,5 +9,7 @@ namespace MessManagementSystem.Services.Interfaces
         Task<AttendanceDto> GetAttendanceByIdAsync(Guid id);
         Task<AttendanceDto> UpdateAttendanceAsync(Guid id, UpdateAttendanceDto updateAttendanceDto);
         Task<AttendanceDto> AddAttendanceAsync(AddAttendanceDto addAttendanceDto);
+        Task<List<AttendanceResponseByUserDto>> GetAttendanceByStudentIdAsync(Guid studentId);
+        Task<List<AttendanceResponseByUserDto>> GetAttendanceByUserIdAsync(Guid userId);
     }
 }

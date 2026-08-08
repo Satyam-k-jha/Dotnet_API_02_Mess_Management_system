@@ -57,6 +57,26 @@ namespace MessManagementSystem.Services.Implementations
             return mapper.Map<AttendanceDto>(attendance);
         }
 
+        public async Task<List<AttendanceResponseByUserDto>> GetAttendanceByStudentIdAsync(Guid studentId)
+        {
+            var attendance = await attendanceRepository.GetByStudentIdAsync(studentId);
+            if(attendance == null)
+            {
+                return null;
+            }
+            return mapper.Map<List<AttendanceResponseByUserDto>>(attendance);
+        }
+
+        public async Task<List<AttendanceResponseByUserDto>> GetAttendanceByUserIdAsync(Guid userId)
+        {
+            var attendance = await attendanceRepository.GetByUserIdAsync(userId);
+            if (attendance == null)
+            {
+                return null;
+            }
+            return mapper.Map<List<AttendanceResponseByUserDto>>(attendance);
+        }
+
         public async Task<AttendanceDto> UpdateAttendanceAsync(Guid id, UpdateAttendanceDto updateAttendanceDto)
         {
             var attendance = mapper.Map<Attendance>(updateAttendanceDto);

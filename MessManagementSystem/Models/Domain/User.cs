@@ -7,8 +7,9 @@
         public string PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Boolean IsActive { get; set; } = true;
-        public String? Role { get; set; }
-        public String? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        public string Role { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public Student? Student { get; set; }
     }
 }

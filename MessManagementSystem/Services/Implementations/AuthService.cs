@@ -2,6 +2,7 @@
 using MessManagementSystem.Data;
 using MessManagementSystem.Models.Domain;
 using MessManagementSystem.Models.DTO;
+using MessManagementSystem.Repositories.Interfaces;
 using MessManagementSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,16 @@ namespace MessManagementSystem.Services.Implementations
         private readonly AppDbContext context;
         private readonly IMapper mapper;
         private readonly IConfiguration configuration;
+        private readonly IStudentService studentService;
+        //private readonly IStudentRepository studentRepository;
 
-        public AuthService(AppDbContext context, IMapper mapper, IConfiguration configuration)
+        public AuthService(AppDbContext context, IMapper mapper, IConfiguration configuration, IStudentService studentService)
         {
             this.context = context;
             this.mapper = mapper;
             this.configuration = configuration;
+            this.studentService = studentService;
+            //this.studentRepository = studentRepository;
         }
         public async Task<TokenResponseDto?> LoginUserAsync(LoginUserDto request)
         {
@@ -52,19 +57,37 @@ namespace MessManagementSystem.Services.Implementations
 
         public async Task<ResponseUserDto?> RegisterUserAsync(RegisterUserDto request)
         {
+            User user = await context.Users
+                .FirstOrDefaultAsync(u => u.UserName == request.UserName);
 
-            User user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
             if (user != null)
             {
                 return null;
             }
-            user = new();
+
+            user = new User();
+
             string hashedPassword = new PasswordHasher<User>()
                 .HashPassword(user, request.Password);
+
             user.UserName = request.UserName;
             user.PasswordHash = hashedPassword;
-            await context.AddAsync(user);
-            await context.SaveChangesAsync();
+            user.Role = request.Role;
+
+            await context.Users.AddAsync(user);
+            await context.SaveChangesAsync();   // User.Id is generated here
+
+            if (user.Role == "Student")
+            {
+                AddStudentDto student = new AddStudentDto
+                {
+                    Name = user.UserName,
+                    UserId = user.Id
+                };
+
+                await studentService.AddStudentAsync(student);
+            }
+
             return mapper.Map<ResponseUserDto>(user);
         }
         public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
@@ -115,13 +138,14 @@ namespace MessManagementSystem.Services.Implementations
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            //Console.WriteLine(key);
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var tokenDescriptor = new JwtSecurityToken(
                 issuer: configuration["Jwt:Issuer"],
                 audience: configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: creds
                 );
 

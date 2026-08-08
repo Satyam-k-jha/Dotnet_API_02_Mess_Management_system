@@ -16,6 +16,7 @@ namespace MessManagementSystem.Mappings
             CreateMap<Attendance, AddAttendanceDto>().ReverseMap();
             CreateMap<Attendance, UpdateAttendanceDto>().ReverseMap();
             CreateMap<Attendance, AttendanceSummaryDto>().ReverseMap();
+            CreateMap<Attendance, AttendanceResponseByUserDto>().ReverseMap();
             CreateMap<Food, FoodDto>().ReverseMap();
             CreateMap<Food, AddFoodDto>().ReverseMap();
             CreateMap<Food, UpdateFoodDto>().ReverseMap();
