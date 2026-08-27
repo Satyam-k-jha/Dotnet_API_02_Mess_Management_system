@@ -9,5 +9,6 @@
         //// Navigation property to represent the many-to-many relationship with Food
         //public ICollection<Food> Foods { get; set; }
 
+
     }
 }

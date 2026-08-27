@@ -22,12 +22,16 @@ namespace MessManagementSystem.Mappings
             CreateMap<Food, UpdateFoodDto>().ReverseMap();
             CreateMap<Food, FoodWithMenuDto>().ReverseMap();
             CreateMap<Food, FoodSummaryDto>().ReverseMap();
+            CreateMap<Food, FoodSummary>().ReverseMap();
             CreateMap<Menu, MenuDto>().ReverseMap();
             CreateMap<Menu, AddMenuDto>().ReverseMap();
             CreateMap<Menu, UpdateMenuDto>().ReverseMap();
             CreateMap<Menu, MenuWithFoodDto>().ReverseMap();
             CreateMap<Menu, MenuSummaryDto>().ReverseMap();
             CreateMap<User, ResponseUserDto>().ReverseMap();
+            CreateMap<MenuFood, MenuFoodDto>().ReverseMap();
+            CreateMap<MenuFood, AddMenuFoodDto>().ReverseMap();
+            CreateMap<MenuFood, UpdateMenuFoodDto>().ReverseMap();
 
 
         }

@@ -8,8 +8,7 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Boolean IsActive { get; set; } = true;
         public string Role { get; set; }
-        public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
         public Student? Student { get; set; }
+
     }
 }
